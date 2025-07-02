@@ -1,12 +1,15 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import TabNavigator from './TabNavigator';
+import { StatusBar } from 'react-native';
 
 export default function App() {
   return (
-    <View>
-      <Text>App</Text>
-    </View>
-  )
+    <>
+      <StatusBar backgroundColor="#fff" barStyle="dark-content" />
+      <NavigationContainer>
+        <TabNavigator />
+      </NavigationContainer>
+    </>
+  );
 }
-
-const styles = StyleSheet.create({})

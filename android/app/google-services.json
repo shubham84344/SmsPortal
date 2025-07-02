@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "969963416205",
+    "project_id": "smsportal-bac70",
+    "storage_bucket": "smsportal-bac70.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:969963416205:android:73581ce85deb8c50d6d0c4",
+        "android_client_info": {
+          "package_name": "com.smsportal"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAL3u644rb0lQCDA2ncBTaUFzVhM-21Dc0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
