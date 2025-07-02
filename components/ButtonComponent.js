@@ -13,10 +13,11 @@ const styles = StyleSheet.create({
   btn: {
     backgroundColor: 'green',
     paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
+    paddingHorizontal: 24,
+    borderRadius: 20,
     alignItems: 'center',
-    marginVertical: 10
+    alignSelf: 'center', 
+    marginTop: 10,
   },
   btnText: {
     color: '#fff',

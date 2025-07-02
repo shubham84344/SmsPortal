@@ -1,13 +1,15 @@
 import React from 'react';
 import { TextInput, StyleSheet } from 'react-native';
 
-export default function InputComponent({ value, onChangeText, placeholder }) {
+export default function InputComponent({ value, onChangeText, placeholder, multiline = false }) {
   return (
     <TextInput
-      style={styles.input}
+      style={[styles.input, multiline && styles.multiline]}
       value={value}
       onChangeText={onChangeText}
       placeholder={placeholder}
+      multiline={multiline}
+      textAlignVertical={multiline ? 'top' : 'center'} 
     />
   );
 }
@@ -18,7 +20,10 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 8,
     padding: 10,
-    width: '90%',
-    marginVertical: 10
-  }
+    width: '100%',
+    marginVertical: 10,
+  },
+  multiline: {
+    minHeight: 60,
+  },
 });
