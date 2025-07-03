@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 
-export default function PickerComponent({ selectedValue, onValueChange, items = [] }) {
+export default function PickerComponent({ selectedValue, onValueChange, items = [], labelKey = 'libraryName', }) {
     return (
         <View style={styles.pickerContainer}>
             <Picker
@@ -13,7 +13,7 @@ export default function PickerComponent({ selectedValue, onValueChange, items = 
             >
                 <Picker.Item label="Select Library" value="" />
                 {items.map(item => (
-                    <Picker.Item label={item.libraryName} value={item.id} key={item.id} />
+                    <Picker.Item label={item[labelKey]} value={item.id} key={item.id} />
                 ))}
             </Picker>
         </View>

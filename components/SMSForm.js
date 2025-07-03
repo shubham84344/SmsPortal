@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 10,
     padding: 16,
-    marginBottom:50,
+    marginBottom:16,
     elevation: 3,
   },
   heading: {
