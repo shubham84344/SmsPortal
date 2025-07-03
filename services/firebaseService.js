@@ -57,13 +57,11 @@ export const deleteLibrary = async (libraryId) => {
 
 export const deleteMessagesByLibraryId = async (libraryId) => {
     try {
-        // Get all messages for this library
         const snapshot = await firestore()
             .collection('message')
             .where('libraryId', '==', libraryId)
             .get();
 
-        // Delete each message in a batch
         const batch = firestore().batch();
         snapshot.docs.forEach(doc => {
             batch.delete(doc.ref);
@@ -76,7 +74,6 @@ export const deleteMessagesByLibraryId = async (libraryId) => {
     }
 };
 
-// Groups Service Functions
 export const getGroups = async () => {
     try {
         const snapshot = await firestore().collection('groups').get();
@@ -109,7 +106,6 @@ export const deleteGroup = async (groupId) => {
     }
 };
 
-// Contacts Service Functions
 export const getContacts = async (groupId) => {
     try {
         const snapshot = await firestore()
@@ -138,13 +134,11 @@ export const addContact = async (groupId, contactData) => {
 
 export const deleteContactsByGroupId = async (groupId) => {
     try {
-        // Get all contacts for this group
         const snapshot = await firestore()
             .collection('contacts')
             .where('groupId', '==', groupId)
             .get();
 
-        // Delete each contact in a batch
         const batch = firestore().batch();
         snapshot.docs.forEach(doc => {
             batch.delete(doc.ref);

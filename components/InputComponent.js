@@ -8,8 +8,9 @@ export default function InputComponent({ value, onChangeText, placeholder, multi
       value={value}
       onChangeText={onChangeText}
       placeholder={placeholder}
+      placeholderTextColor={'#888'}
       multiline={multiline}
-      textAlignVertical={multiline ? 'top' : 'center'} 
+      textAlignVertical={multiline ? 'top' : 'center'}
     />
   );
 }
@@ -22,6 +23,7 @@ const styles = StyleSheet.create({
     padding: 10,
     width: '100%',
     marginVertical: 10,
+    color: 'black'
   },
   multiline: {
     minHeight: 60,
