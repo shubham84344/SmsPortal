@@ -4,28 +4,32 @@ import { getLibraries, addMessage } from '../services/firebaseService';
 import InputComponent from '../components/InputComponent';
 import ButtonComponent from '../components/ButtonComponent';
 import PickerComponent from '../components/PickerComponent';
+import { useIsFocused } from '@react-navigation/native';
 
 export default function MessageScreen({ navigation }) {
   const [libraries, setLibraries] = useState([]);
   const [selectedLibraryId, setSelectedLibraryId] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const isFocused = useIsFocused();
+
+  const fetchLibraries = async () => {
+    try {
+      setLoading(true);
+      const libs = await getLibraries();
+      setLibraries(libs);
+    } catch (error) {
+      ToastAndroid.show('Failed to fetch libraries', ToastAndroid.SHORT);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchLibraries = async () => {
-      try {
-        setLoading(true);
-        const libs = await getLibraries();
-        setLibraries(libs);
-      } catch (error) {
-        ToastAndroid.show('Failed to fetch libraries', ToastAndroid.SHORT);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchLibraries();
-  }, []);
+    if (isFocused) {
+      fetchLibraries();
+    }
+  }, [isFocused]);
 
   const handleSubmit = async () => {
     if (!selectedLibraryId || !message.trim()) {

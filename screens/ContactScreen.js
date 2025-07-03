@@ -4,6 +4,7 @@ import { getGroups, addContact } from '../services/firebaseService';
 import InputComponent from '../components/InputComponent';
 import ButtonComponent from '../components/ButtonComponent';
 import PickerComponent from '../components/PickerComponent';
+import { useIsFocused } from '@react-navigation/native';
 
 export default function ContactScreen({ navigation }) {
     const [groups, setGroups] = useState([]);
@@ -15,22 +16,26 @@ export default function ContactScreen({ navigation }) {
         email: ''
     });
     const [loading, setLoading] = useState(false);
+    const isFocused = useIsFocused();
+
 
     useEffect(() => {
-        const fetchGroups = async () => {
-            try {
-                setLoading(true);
-                const groupsData = await getGroups();
-                setGroups(groupsData);
-            } catch (error) {
-                ToastAndroid.show('Failed to fetch groups', ToastAndroid.SHORT);
-            } finally {
-                setLoading(false);
-            }
-        };
+        if (isFocused) {
+            fetchGroups();
+        }
+    }, [isFocused]);
 
-        fetchGroups();
-    }, []);
+    const fetchGroups = async () => {
+        try {
+            setLoading(true);
+            const groupsData = await getGroups();
+            setGroups(groupsData);
+        } catch (error) {
+            ToastAndroid.show('Failed to fetch groups', ToastAndroid.SHORT);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleInputChange = (field, value) => {
         setContactData(prev => ({ ...prev, [field]: value }));

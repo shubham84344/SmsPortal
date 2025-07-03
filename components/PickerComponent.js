@@ -13,7 +13,7 @@ export default function PickerComponent({ selectedValue, onValueChange, items = 
             >
                 <Picker.Item label="Select" value="" color='#000' />
                 {items.map(item => (
-                    <Picker.Item label={item[labelKey]} value={item.id} key={item.id} />
+                    <Picker.Item color='#000' label={item[labelKey]} value={item.id} key={item.id} />
                 ))}
             </Picker>
         </View>
