@@ -27,7 +27,6 @@ const HomeScreen = () => {
   const [loading, setLoading] = useState(false);
   const isFocused = useIsFocused();
 
-  // Form state
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -48,14 +47,12 @@ const HomeScreen = () => {
 
       if (libs.length > 0) {
         setSelectedLibraryId(libs[0].id);
-        // Fetch messages for the first library immediately
         const msgs = await getMessages(libs[0].id);
         setMessages(msgs);
       }
 
       if (grps.length > 0) {
         setSelectedGroupId(grps[0].id);
-        // Fetch contacts for the first group immediately
         const cntcts = await getContacts(grps[0].id);
         setContacts(cntcts);
       }
@@ -91,26 +88,6 @@ const HomeScreen = () => {
     };
     fetchMessages();
   }, [selectedLibraryId]);
-
-  // useEffect(() => {
-  //   if (!selectedGroupId) return;
-  //   setSelectedContactId('');
-
-  //   const fetchContacts = async () => {
-  //     setLoading(true);
-  //     try {
-  //       const cntcts = await getContacts(selectedGroupId);
-  //       console.log(cntcts);
-  //       setContacts(cntcts);
-  //     } catch (error) {
-  //       console.error(error);
-  //       ToastAndroid.show('Failed to load contacts', ToastAndroid.LONG);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   fetchContacts();
-  // }, [selectedGroupId]);
 
   const handleDeleteLibrary = async (libraryId) => {
     setLoading(true);
@@ -168,13 +145,38 @@ const HomeScreen = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  useEffect(() => {
+    if (!selectedContactId) return;
+
+    const selectedContact = contacts.find(c => c.id === selectedContactId);
+    if (selectedContact) {
+      setFormData(prev => ({
+        ...prev,
+        name: selectedContact.name || '',
+        email: selectedContact.email || '',
+        mobile: selectedContact.mobile || '',
+      }));
+    }
+  }, [selectedContactId]);
+
+  useEffect(() => {
+    if (!selectedMessageId) return;
+
+    const selectedMessage = messages.find(m => m.id === selectedMessageId);
+    if (selectedMessage) {
+      setFormData(prev => ({
+        ...prev,
+        message: selectedMessage.messageText || '',
+      }));
+    }
+  }, [selectedMessageId]);
+
   const handleSendSMS = () => {
     if (!formData.name || !formData.mobile || !formData.message) {
       Alert.alert('Error', 'Please fill all required fields');
       return;
     }
-
-    ToastAndroid.show('SMS prepared!', ToastAndroid.LONG);
+    ToastAndroid.show('SMS Send', ToastAndroid.LONG);
     setFormData({ name: '', email: '', mobile: '', message: '' });
   };
 
@@ -190,19 +192,20 @@ const HomeScreen = () => {
           showDelete
           onDelete={handleDeleteLibrary}
         />
-
         <ListCard
           title="Messages"
           items={messages.map(msg => ({ ...msg, text: msg.messageText }))}
           selectedId={selectedMessageId}
-          onSelect={setSelectedMessageId}
+          onSelect={(id) => {
+            setSelectedMessageId(id);
+            setSelectedContactId('');
+          }}
         />
         <SMSForm
           formData={formData}
           onFieldChange={handleFieldChange}
           onSubmit={handleSendSMS}
         />
-
         <ListCard
           title="Groups"
           items={groups.map(grp => ({ ...grp, text: grp.groupName }))}
@@ -211,7 +214,6 @@ const HomeScreen = () => {
           showDelete
           onDelete={handleDeleteGroup}
         />
-
         <ListCard
           title="Contacts"
           items={contacts.map(contact => ({
@@ -219,7 +221,10 @@ const HomeScreen = () => {
             text: `${contact.name} - ${contact.mobile} - ${contact.email}`
           }))}
           selectedId={selectedContactId}
-          onSelect={setSelectedContactId}
+          onSelect={(id) => {
+            setSelectedContactId(id);
+            setSelectedMessageId('');
+          }}
           style={{ marginBottom: 40 }}
         />
 

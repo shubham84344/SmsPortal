@@ -11,7 +11,7 @@ export default function PickerComponent({ selectedValue, onValueChange, items = 
                 style={styles.picker}
                 dropdownIconColor="#333"
             >
-                <Picker.Item label="Select Library" value="" />
+                <Picker.Item label="Select" value="" />
                 {items.map(item => (
                     <Picker.Item label={item[labelKey]} value={item.id} key={item.id} />
                 ))}
