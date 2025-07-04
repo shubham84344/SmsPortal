@@ -16,6 +16,7 @@ import ListCard from '../components/ListCard';
 import SMSForm from '../components/SMSForm';
 
 const HomeScreen = () => {
+  // State declarations
   const [libraries, setLibraries] = useState([]);
   const [selectedLibraryId, setSelectedLibraryId] = useState('');
   const [messages, setMessages] = useState([]);
@@ -34,46 +35,43 @@ const HomeScreen = () => {
     message: ''
   });
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const [libs, grps] = await Promise.all([
-        getLibraries(),
-        getGroups()
-      ]);
-
-      setLibraries(libs);
-      setGroups(grps);
-
-      if (libs.length > 0) {
-        setSelectedLibraryId(libs[0].id);
-        const msgs = await getMessages(libs[0].id);
-        setMessages(msgs);
-      }
-
-      if (grps.length > 0) {
-        setSelectedGroupId(grps[0].id);
-        const cntcts = await getContacts(grps[0].id);
-        setContacts(cntcts);
-      }
-    } catch (error) {
-      console.error(error);
-      ToastAndroid.show('Failed to load data', ToastAndroid.LONG);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Fetch initial data when screen is focused
   useEffect(() => {
-    if (isFocused) {
-      fetchData();
-    }
+    if (!isFocused) return;
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [libs, grps] = await Promise.all([getLibraries(), getGroups()]);
+        setLibraries(libs);
+        setGroups(grps);
+
+        if (libs.length > 0) {
+          const firstLibraryId = libs[0].id;
+          setSelectedLibraryId(firstLibraryId);
+          const msgs = await getMessages(firstLibraryId);
+          setMessages(msgs);
+        }
+
+        if (grps.length > 0) {
+          const firstGroupId = grps[0].id;
+          setSelectedGroupId(firstGroupId);
+          const cntcts = await getContacts(firstGroupId);
+          setContacts(cntcts);
+        }
+      } catch (error) {
+        console.error(error);
+        ToastAndroid.show('Failed to load data', ToastAndroid.LONG);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, [isFocused]);
 
+  // Fetch messages when library changes
   useEffect(() => {
     if (!selectedLibraryId) return;
     setSelectedMessageId('');
-
     const fetchMessages = async () => {
       setLoading(true);
       try {
@@ -89,24 +87,84 @@ const HomeScreen = () => {
     fetchMessages();
   }, [selectedLibraryId]);
 
+  // Fetch contacts when group changes
+  useEffect(() => {
+    if (!selectedGroupId) return;
+    setSelectedContactId('');
+    const fetchContactsData = async () => {
+      setLoading(true);
+      try {
+        const cntcts = await getContacts(selectedGroupId);
+        setContacts(cntcts);
+      } catch (error) {
+        console.error(error);
+        ToastAndroid.show('Failed to load contacts', ToastAndroid.LONG);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchContactsData();
+  }, [selectedGroupId]);
+
+  // Update form with selected contact info
+  useEffect(() => {
+    if (!selectedContactId) return;
+    const selected = contacts.find(c => c.id === selectedContactId);
+    if (selected) {
+      setFormData(prev => ({
+        ...prev,
+        name: selected.name || '',
+        email: selected.email || '',
+        mobile: selected.mobile || '',
+      }));
+    }
+  }, [selectedContactId]);
+
+  // Update form with selected message text
+  useEffect(() => {
+    if (!selectedMessageId) return;
+    const selected = messages.find(m => m.id === selectedMessageId);
+    if (selected) {
+      setFormData(prev => ({
+        ...prev,
+        message: selected.messageText || '',
+      }));
+    }
+  }, [selectedMessageId]);
+
+  // Form input change
+  const handleFieldChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Handle send SMS
+  const handleSendSMS = () => {
+    if (!formData.name || !formData.mobile || !formData.message) {
+      Alert.alert('Error', 'Please fill all required fields');
+      return;
+    }
+    ToastAndroid.show('SMS Send', ToastAndroid.LONG);
+    setFormData({ name: '', email: '', mobile: '', message: '' });
+  };
+
+  // Handle library deletion
   const handleDeleteLibrary = async (libraryId) => {
     setLoading(true);
     try {
-      const libraryToDelete = libraries.find(lib => lib.id === libraryId);
-      const libraryName = libraryToDelete?.libraryName || '';
-
+      const lib = libraries.find(l => l.id === libraryId);
+      const name = lib?.libraryName || '';
       await deleteMessagesByLibraryId(libraryId);
       await deleteLibrary(libraryId);
 
-      const updatedLibraries = libraries.filter(lib => lib.id !== libraryId);
-      setLibraries(updatedLibraries);
+      const updated = libraries.filter(l => l.id !== libraryId);
+      setLibraries(updated);
 
       if (selectedLibraryId === libraryId) {
-        setSelectedLibraryId(updatedLibraries[0]?.id || '');
+        setSelectedLibraryId(updated[0]?.id || '');
         setMessages([]);
       }
 
-      ToastAndroid.show(`Deleted library: ${libraryName}`, ToastAndroid.LONG);
+      ToastAndroid.show(`Deleted library: ${name}`, ToastAndroid.LONG);
     } catch (error) {
       console.error('Error deleting library:', error);
       ToastAndroid.show('Failed to delete library', ToastAndroid.LONG);
@@ -115,69 +173,30 @@ const HomeScreen = () => {
     }
   };
 
+  // Handle group deletion
   const handleDeleteGroup = async (groupId) => {
     setLoading(true);
     try {
-      const groupToDelete = groups.find(grp => grp.id === groupId);
-      const groupName = groupToDelete?.groupName || '';
-
+      const grp = groups.find(g => g.id === groupId);
+      const name = grp?.groupName || '';
       await deleteContactsByGroupId(groupId);
       await deleteGroup(groupId);
 
-      const updatedGroups = groups.filter(grp => grp.id !== groupId);
-      setGroups(updatedGroups);
+      const updated = groups.filter(g => g.id !== groupId);
+      setGroups(updated);
 
       if (selectedGroupId === groupId) {
-        setSelectedGroupId(updatedGroups[0]?.id || '');
+        setSelectedGroupId(updated[0]?.id || '');
         setContacts([]);
       }
 
-      ToastAndroid.show(`Deleted group: ${groupName}`, ToastAndroid.LONG);
+      ToastAndroid.show(`Deleted group: ${name}`, ToastAndroid.LONG);
     } catch (error) {
       console.error('Error deleting group:', error);
       ToastAndroid.show('Failed to delete group', ToastAndroid.LONG);
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleFieldChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  useEffect(() => {
-    if (!selectedContactId) return;
-
-    const selectedContact = contacts.find(c => c.id === selectedContactId);
-    if (selectedContact) {
-      setFormData(prev => ({
-        ...prev,
-        name: selectedContact.name || '',
-        email: selectedContact.email || '',
-        mobile: selectedContact.mobile || '',
-      }));
-    }
-  }, [selectedContactId]);
-
-  useEffect(() => {
-    if (!selectedMessageId) return;
-
-    const selectedMessage = messages.find(m => m.id === selectedMessageId);
-    if (selectedMessage) {
-      setFormData(prev => ({
-        ...prev,
-        message: selectedMessage.messageText || '',
-      }));
-    }
-  }, [selectedMessageId]);
-
-  const handleSendSMS = () => {
-    if (!formData.name || !formData.mobile || !formData.message) {
-      Alert.alert('Error', 'Please fill all required fields');
-      return;
-    }
-    ToastAndroid.show('SMS Send', ToastAndroid.LONG);
-    setFormData({ name: '', email: '', mobile: '', message: '' });
   };
 
   return (
@@ -227,7 +246,6 @@ const HomeScreen = () => {
           }}
           style={{ marginBottom: 40 }}
         />
-
       </ScrollView>
     </View>
   );
